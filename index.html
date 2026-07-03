@@ -295,10 +295,8 @@
     let username = "";
     let answered = false;
 
-    let ranking = JSON.parse(localStorage.getItem('ecoQuizRankingReciclagem')) || [
-        {name: "Profe Silvia", score: 14},
-        {name: "EcoAluno", score: 11}
-    ];
+    // Lista vazia para começar sem nenhum bot!
+    let ranking = JSON.parse(localStorage.getItem('ecoQuizRankingReciclagem')) || [];
 
     function startQuiz() {
         username = document.getElementById('username').value.trim();
@@ -404,6 +402,12 @@
     function updateRankingTable() {
         const tbody = document.getElementById('ranking-body');
         tbody.innerHTML = "";
+        
+        if (ranking.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="3" style="color: #64748b; font-style: italic;">Nenhum jogador pontuou ainda. Seja o primeiro! 🏆</td></tr>`;
+            return;
+        }
+
         ranking.forEach((player, index) => {
             const row = `<tr>
                 <td>${index + 1}º</td>
