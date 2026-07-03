@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eco Quiz 🌍</title>
+    <style>
+        :root {
+            --primary-color: #2e7d32;
+            --secondary-color: #81c784;
+            --background-color: #e8f5e9;
+            --text-color: #1b5e20;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background-color);
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        h1 { color: var(--primary-color); }
+        
+        .btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 10px;
+            width: 100%;
+        }
+
+        .btn:hover { background-color: #1b5e20; }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            margin: 20px 0;
+        }
+
+        .option-btn {
+            background-color: #f1f8e9;
+            color: var(--text-color);
+            border: 2px solid var(--secondary-color);
+            padding: 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            text-align: left;
+            transition: 0.2s;
+        }
+
+        .option-btn:hover { background-color: var(--secondary-color); color: white; }
+
+        .hidden { display: none; }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        .ranking-table th, .ranking-table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        .ranking-table th { background-color: var(--primary-color); color: white; }
+
+        .media-box img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>Eco Quiz 🌍</h1>
+        <p>Mestre da Reciclagem! Teste seus conhecimentos com 20 perguntas que mudam de ordem a cada rodada.</p>
+        <div class="media-box">
+            <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExbWp0Z2N0Zm95ZnZ5ZnFwY2ZndmN3ZzR4d3Rrem15ZnB5Y3F6NHl3ZiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3ohzdIuqJoo8QdK2A0/giphy.gif" alt="Planeta Terra Feliz">
+        </div>
+        <input type="text" id="username" placeholder="Digite seu nome" style="padding: 10px; width: 80%; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ccc;"><br>
+        <button class="btn" onclick="startQuiz()">Começar Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <h3 id="question-number">Pergunta 1 de 20</h3>
+        <p id="question-text" style="font-size: 18px; font-weight: bold;"></p>
+        <div class="options-container" id="options-box"></div>
+    </div>
+
+    <div id="end-screen" class="hidden">
+        <h2>Fim de Jogo! 🎉</h2>
+        <p id="score-text"></p>
+        
+        <h3>🏆 Ranking dos Eco-Gênios</h3>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th>Posição</th>
+                    <th>Nome</th>
+                    <th>Pontos</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-body"></tbody>
+        </table>
+
+        <button class="btn" onclick="restartQuiz()">Jogar Novamente 🔄</button>
+    </div>
+</div>
+
+<script>
+    // Banco de dados com exatamente 20 perguntas sobre Reciclagem
+    const totalQuestionsDatabase = [
+        { q: "Qual a cor da lixeira destinada ao descarte de plástico?", o: ["Verde", "Azul", "Vermelha", "Amarela"], a: 2 },
+        { q: "Qual material deve ser descartado na lixeira azul?", o: ["Papel e Papelão", "Vidro", "Metal", "Resíduo Orgânico"], a: 0 },
+        { q: "A lixeira amarela serve para coletar qual tipo de resíduo?", o: ["Plástico", "Metal", "Vidro", "Pilhas"], a: 1 },
+        { q: "Na lixeira verde, qual material deve ser jogado?", o: ["Papel", "Orgânico", "Plástico", "Vidro"], a: 3 },
+        { q: "Qual a utilidade da lixeira de cor marrom?", o: ["Resíduos Orgânicos", "Madeira", "Eletrônicos", "Lixo Hospitalar"], a: 0 },
+        { q: "Onde devem ser descartadas pilhas e baterias velhas?", o: ["Na lixeira vermelha", "Na lixeira amarela", "Em postos de coleta específicos", "No lixo comum"], a: 2 },
+        { q: "Qual destes materiais NÃO pode ser reciclado?", o: ["Garrafa PET", "Caixa de papelão", "Espelho", "Lata de alumínio"], a: 2 },
+        { q: "A caixa de leite (longa vida) é feita de quais materiais?", o: ["Apenas plástico", "Papel, plástico e alumínio", "Apenas papelão", "Vidro e plástico"], a: 1 },
+        { q: "O que deve ser feito com o óleo de cozinha usado?", o: ["Jogar na pia", "Jogar no vaso sanitário", "Guardar em garrafa PET e levar ao descarte correto", "Enterrar no quintal"], a: 2 },
+        { q: "Qual o tempo estimado para o plástico se decompor na natureza?", o: ["Cerca de 10 anos", "Mais de 400 anos", "50 anos", "Apenas 1 ano"], a: 1 },
+        { q: "O alumínio pode ser reciclado quantas vezes?", o: ["Apenas 1 vez", "No máximo 5 vezes", "Infinitas vezes", "Não pode ser reciclado"], a: 2 },
+        { q: "Qual termo define o processo de transformar resíduos orgânicos em adubo?", o: ["Incineração", "Compostagem", "Logística reversa", "Aterro sanitário"], a: 1 },
+        { q: "O que significa o conceito de Logística Reversa?", o: ["Devolver o produto usado ao fabricante para reciclagem", "Entregar o lixo na casa do vizinho", "Comprar apenas produtos importados", "Reciclar em casa"], a: 0 },
+        { q: "Papel higiênico usado e guardanapos sujos de gordura são recicláveis?", o: ["Sim, na lixeira azul", "Não, são considerados rejeitos não recicláveis", "Sim, se forem lavados", "Sim, na lixeira vermelha"], a: 1 },
+        { q: "Qual o maior benefício da reciclagem para o planeta?", o: ["Deixar as cidades mais coloridas", "Pagar menos impostos", "Economizar recursos naturais e reduzir o lixo nos aterros", "Aumentar a produção de plástico"], a: 3 },
+        { q: "Qual símbolo universal representa a reciclagem?", o: ["Uma árvore verde", "Três setas que formam um triângulo", "Um globo terrestre", "Uma gota de água"], a: 1 },
+        { q: "Onde devem ser levados os eletrodomésticos e celulares quebrados?", o: ["Deixados na calçada", "Jogados no lixo comum", "Pontos de coleta de lixo eletrônico (E-lixo)", "Na lixeira amarela"], a: 2 },
+        { q: "Se você encontrar um vidro quebrado, como deve descartá-lo com segurança?", o: ["Jogar direto na lixeira", "Embalar em jornal ou garrafa PET cortada antes de descartar", "Deixar no chão para o gari recolher", "Quebrar em pedaços ainda menores"], a: 1 },
+        { q: "O que reduz significativamente a necessidade de extração de minério de bauxita?", o: ["A reciclagem de vidro", "A reciclagem de papel", "A reciclagem de latas de alumínio", "A compostagem"], a: 2 },
+        { q: "Completar a frase: Reciclar é bom, mas o melhor para o meio ambiente é primeiro...", o: ["Gastar mais", "Reduzir o consumo e evitar gerar o lixo", "Queimar o lixo", "Acumular embalagens"], a: 1 }
+    ];
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let username = "";
+
+    let ranking = JSON.parse(localStorage.getItem('ecoQuizRankingReciclagem')) || [
+        {name: "Profe Silvia", score: 18},
+        {name: "EcoAluno", score: 15}
+    ];
+
+    function startQuiz() {
+        username = document.getElementById('username').value.trim();
+        if (!username) {
+            alert("Por favor, digite seu nome para jogar!");
+            return;
+        }
+
+        // Mistura as perguntas aleatoriamente e garante que todas as 20 entrem no jogo
+        currentQuestions = [...totalQuestionsDatabase].sort(() => 0.5 - Math.random());
+        currentQuestionIndex = 0;
+        score = 0;
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (currentQuestionIndex >= currentQuestions.length) {
+            endQuiz();
+            return;
+        }
+
+        const qData = currentQuestions[currentQuestionIndex];
+        document.getElementById('question-number').innerText = `Pergunta ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+        document.getElementById('question-text').innerText = qData.q;
+
+        const optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = "";
+
+        qData.o.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.classList.add('option-btn');
+            button.innerText = option;
+            button.onclick = () => checkAnswer(index);
+            optionsBox.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedIndex) {
+        if (selectedIndex === currentQuestions[currentQuestionIndex].a) {
+            score++;
+            alert("Correto! 🌱 Você somou um ponto.");
+        } else {
+            const correctAnswerText = currentQuestions[currentQuestionIndex].o[currentQuestions[currentQuestionIndex].a];
+            alert(`Ops, incorreto! 🍂 A resposta certa era: ${correctAnswerText}`);
+        }
+        currentQuestionIndex++;
+        showQuestion();
+    }
+
+    function endQuiz() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('score-text').innerText = `${username}, você acertou ${score} de ${currentQuestions.length} perguntas!`;
+
+        ranking.push({ name: username, score: score });
+        ranking.sort((a, b) => b.score - a.score);
+        ranking = ranking.slice(0, 5); // Mantém o Top 5
+        localStorage.setItem('ecoQuizRankingReciclagem', JSON.stringify(ranking));
+
+        updateRankingTable();
+    }
+
+    function updateRankingTable() {
+        const tbody = document.getElementById('ranking-body');
+        tbody.innerHTML = "";
+        ranking.forEach((player, index) => {
+            const row = `<tr>
+                <td>${index + 1}º</td>
+                <td>${player.name}</td>
+                <td>${player.score}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function restartQuiz() {
+        window.location.reload(); 
+    }
+</script>
+</body>
+</html>
