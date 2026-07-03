@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoQuizz 🌍</title>
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #1b5e20, #43a047);
+            --bg-gradient: linear-gradient(135deg, #e8f5e9, #c8e6c9);
+            --correct-color: #2e7d32;
+            --wrong-color: #c62828;
+            --text-color: #2c3e50;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 35px;
+            border-radius: 24px;
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        h1 {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+            font-weight: 800;
+        }
+
+        p.subtitle {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 25px;
+            line-height: 1.4;
+        }
+        
+        .btn {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            box-shadow: 0 4px 10px rgba(27, 94, 32, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(27, 94, 32, 0.3);
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            margin: 25px 0 15px 0;
+            gap: 12px;
+        }
+
+        .option-btn {
+            background-color: #ffffff;
+            color: var(--text-color);
+            border: 2px solid #e0e0e0;
+            padding: 16px;
+            border-radius: 14px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            text-align: left;
+            transition: all 0.2s ease;
+        }
+
+        .option-btn:hover:not([disabled]) {
+            border-color: #a5d6a7;
+            background-color: #f1f8e9;
+        }
+
+        .option-btn.correct {
+            background-color: #e8f5e9 !important;
+            border-color: var(--correct-color) !important;
+            color: var(--correct-color) !important;
+            font-weight: 600;
+        }
+
+        .option-btn.wrong {
+            background-color: #ffebee !important;
+            border-color: var(--wrong-color) !important;
+            color: var(--wrong-color) !important;
+            font-weight: 600;
+        }
+
+        #feedback-box {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.4;
+            display: none;
+        }
+
+        #feedback-box.correct-feedback {
+            background-color: #e8f5e9;
+            color: var(--correct-color);
+        }
+
+        #feedback-box.wrong-feedback {
+            background-color: #ffebee;
+            color: var(--wrong-color);
+        }
+
+        .hidden { display: none !important; }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .ranking-table th, .ranking-table td {
+            padding: 12px;
+            text-align: center;
+        }
+
+        .ranking-table th {
+            background: var(--primary-gradient);
+            color: white;
+        }
+
+        .ranking-table tr:nth-child(even) { background-color: #f9f9f9; }
+        .ranking-table td { border-bottom: 1px solid #eee; }
+
+        .media-box img {
+            max-width: 100%;
+            height: auto;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 15px;
+            margin-bottom: 20px;
+        }
+
+        #question-number {
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #43a047;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        #question-text {
+            font-size: 1.25rem;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        input[type="text"] {
+            padding: 14px;
+            width: 100%;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            border: 2px solid #e0e0e0;
+            font-size: 16px;
+            outline: none;
+            text-align: center;
+        }
+
+        input[type="text"]:focus {
+            border-color: #43a047;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div id="start-screen">
+        <h1>EcoQuizz 🌍</h1>
+        <p class="subtitle">Mestre da Reciclagem! Teste seus conhecimentos com 20 perguntas pedagógicas que mudam de ordem a cada rodada.</p>
+        <div class="media-box">
+            <img src="https://cdn-icons-png.flaticon.com/512/3246/3246320.png" alt="Símbolo da Reciclagem">
+        </div>
+        <input type="text" id="username" placeholder="Digite seu nome para jogar">
+        <button class="btn" onclick="startQuiz()">Começar Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div id="question-number">Pergunta 1 de 20</div>
+        <div id="question-text"></div>
+        
+        <div class="options-container" id="options-box"></div>
+        
+        <div id="feedback-box"></div>
+        
+        <button id="next-btn" class="btn hidden" style="margin-top: 15px;" onclick="nextQuestion()">Próxima Pergunta ➡️</button>
+    </div>
+
+    <div id="end-screen" class="hidden">
+        <h2>Fim de Jogo! 🎉</h2>
+        <p id="score-text" style="font-size: 1.2rem; margin: 15px 0; font-weight: 600;"></p>
+        
+        <h3 style="margin-top: 25px; color: #1b5e20;">🏆 Ranking dos Eco-Gênios</h3>
+        <table class="ranking-table">
+            <thead>
+                <tr>
+                    <th style="border-top-left-radius: 12px;">Posição</th>
+                    <th>Nome</th>
+                    <th style="border-top-right-radius: 12px;">Pontos</th>
+                </tr>
+            </thead>
+            <tbody id="ranking-body"></tbody>
+        </table>
+
+        <button class="btn" style="margin-top: 10px;" onclick="restartQuiz()">Jogar Novamente 🔄</button>
+    </div>
+</div>
+
+<script>
+    const totalQuestionsDatabase = [
+        { q: "Qual a cor da lixeira destinada ao descarte de plástico?", o: ["Verde", "Azul", "Vermelha", "Amarela"], a: 2 },
+        { q: "Qual material deve ser descartado na lixeira azul?", o: ["Papel e Papelão", "Vidro", "Metal", "Resíduo Orgânico"], a: 0 },
+        { q: "A lixeira amarela serve para coletar qual tipo de resíduo?", o: ["Plástico", "Metal", "Vidro", "Pilhas"], a: 1 },
+        { q: "Na lixeira verde, qual material deve ser jogado?", o: ["Papel", "Orgânico", "Plástico", "Vidro"], a: 3 },
+        { q: "Qual a utilidade da lixeira de cor marrom?", o: ["Resíduos Orgânicos", "Madeira", "Eletrônicos", "Lixo Hospitalar"], a: 0 },
+        { q: "Onde devem ser descartadas pilhas e baterias velhas?", o: ["Na lixeira vermelha", "Na lixeira amarela", "Em postos de coleta específicos", "No lixo comum"], a: 2 },
+        { q: "Qual destes materiais NÃO pode ser reciclado?", o: ["Garrafa PET", "Caixa de papelão", "Espelho", "Lata de alumínio"], a: 2 },
+        { q: "A caixa de leite (longa vida) é feita de quais materiais?", o: ["Apenas plástico", "Papel, plástico e alumínio", "Apenas papelão", "Vidro e plástico"], a: 1 },
+        { q: "O que deve ser feito com o óleo de cozinha usado?", o: ["Jogar na pia", "Jogar no vaso sanitário", "Guardar em garrafa PET e levar ao descarte correto", "Enterrar no quintal"], a: 2 },
+        { q: "Qual o tempo estimado para o plástico se decompor na natureza?", o: ["Cerca de 10 anos", "Mais de 400 anos", "50 anos", "Apenas 1 ano"], a: 1 },
+        { q: "O alumínio pode ser reciclado quantas vezes?", o: ["Apenas 1 vez", "No máximo 5 vezes", "Infinitas vezes", "Não pode ser reciclado"], a: 2 },
+        { q: "Qual termo define o processo de transformar resíduos orgânicos em adubo?", o: ["Incineração", "Compostagem", "Logística reversa", "Aterro sanitário"], a: 1 },
+        { q: "O que significa o conceito de Logística Reversa?", o: ["Devolver o produto usado ao fabricante para reciclagem", "Entregar o lixo na casa do vizinho", "Comprar apenas produtos importados", "Reciclar em casa"], a: 0 },
+        { q: "Papel higiênico usado e guardanapos sujos de gordura são recicláveis?", o: ["Sim, na lixeira azul", "Não, são considerados rejeitos não recicláveis", "Sim, se forem lavados", "Sim, na lixeira vermelha"], a: 1 },
+        { q: "Qual o maior benefício da reciclagem para o planeta?", o: ["Deixar as cidades mais coloridas", "Pagar menos impostos", "Economizar recursos naturais e reduzir o lixo nos aterros", "Aumentar a produção de plástico"], a: 3 },
+        { q: "Qual símbolo universal representa a reciclagem?", o: ["Uma árvore verde", "Três setas que formam um triângulo", "Um globo terrestre", "Uma gota de água"], a: 1 },
+        { q: "Onde devem ser levados os eletrodomésticos e celulares quebrados?", o: ["Deixados na calçada", "Jogados no lixo comum", "Pontos de coleta de lixo eletrônico (E-lixo)", "Na lixeira amarela"], a: 2 },
+        { q: "Se você encontrar um vidro quebrado, como deve descartá-lo com segurança?", o: ["Jogar direto na lixeira", "Embalar em jornal ou garrafa PET cortada antes de descartar", "Deixar no chão para o gari recolher", "Quebrar em pedaços ainda menores"], a: 1 },
+        { q: "O que reduz significativamente a necessidade de extração de minério de bauxita?", o: ["A reciclagem de vidro", "A reciclagem de papel", "A reciclagem de latas de alumínio", "A compostagem"], a: 2 },
+        { q: "Completar a frase: Reciclar é bom, mas o melhor para o meio ambiente é primeiro...", o: ["Gastar mais", "Reduzir o consumo e evitar gerar o lixo", "Queimar o lixo", "Acumular embalagens"], a: 1 }
+    ];
+
+    let currentQuestions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let username = "";
+    let answered = false;
+
+    let ranking = JSON.parse(localStorage.getItem('ecoQuizRankingReciclagem')) || [
+        {name: "Profe Silvia", score: 18},
+        {name: "EcoAluno", score: 15}
+    ];
+
+    function startQuiz() {
+        username = document.getElementById('username').value.trim();
+        if (!username) {
+            alert("Por favor, digite seu nome para jogar!");
+            return;
+        }
+
+        currentQuestions = [...totalQuestionsDatabase].sort(() => 0.5 - Math.random());
+        currentQuestionIndex = 0;
+        score = 0;
+
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('quiz-screen').classList.remove('hidden');
+        
+        showQuestion();
+    }
+
+    function showQuestion() {
+        answered = false;
+        document.getElementById('next-btn').classList.add('hidden');
+        
+        const feedbackBox = document.getElementById('feedback-box');
+        feedbackBox.style.display = "none";
+        feedbackBox.className = "";
+
+        if (currentQuestionIndex >= currentQuestions.length) {
+            endQuiz();
+            return;
+        }
+
+        const qData = currentQuestions[currentQuestionIndex];
+        document.getElementById('question-number').innerText = `Pergunta ${currentQuestionIndex + 1} de ${currentQuestions.length}`;
+        document.getElementById('question-text').innerText = qData.q;
+
+        const optionsBox = document.getElementById('options-box');
+        optionsBox.innerHTML = "";
+
+        qData.o.forEach((option, index) => {
+            const button = document.createElement('button');
+            button.classList.add('option-btn');
+            button.innerText = option;
+            button.onclick = () => checkAnswer(button, index);
+            optionsBox.appendChild(button);
+        });
+    }
+
+    function checkAnswer(selectedButton, selectedIndex) {
+        if (answered) return;
+        answered = true;
+
+        const qData = currentQuestions[currentQuestionIndex];
+        const buttons = document.querySelectorAll('.option-btn');
+        const feedbackBox = document.getElementById('feedback-box');
+
+        buttons.forEach(btn => btn.disabled = true);
+
+        if (selectedIndex === qData.a) {
+            score++;
+            selectedButton.classList.add('correct');
+            feedbackBox.innerText = "🌱 Excelente! Você acertou e somou 1 ponto.";
+            feedbackBox.className = "correct-feedback";
+        } else {
+            selectedButton.classList.add('wrong');
+            buttons[qData.a].classList.add('correct');
+            feedbackBox.innerText = `🍂 Incorreto! A resposta pedagógica certa é: "${qData.o[qData.a]}".`;
+            feedbackBox.className = "wrong-feedback";
+        }
+
+        feedbackBox.style.display = "block";
+        document.getElementById('next-btn').classList.remove('hidden');
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        showQuestion();
+    }
+
+    function endQuiz() {
+        document.getElementById('quiz-screen').classList.add('hidden');
+        document.getElementById('end-screen').classList.remove('hidden');
+        document.getElementById('score-text').innerText = `${username}, você acertou ${score} de ${currentQuestions.length} perguntas!`;
+
+        ranking.push({ name: username, score: score });
+        ranking.sort((a, b) => b.score - a.score);
+        ranking = ranking.slice(0, 5);
+        localStorage.setItem('ecoQuizRankingReciclagem', JSON.stringify(ranking));
+
+        updateRankingTable();
+    }
+
+    function updateRankingTable() {
+        const tbody = document.getElementById('ranking-body');
+        tbody.innerHTML = "";
+        ranking.forEach((player, index) => {
+            const row = `<tr>
+                <td>${index + 1}º</td>
+                <td>${player.name}</td>
+                <td>${player.score}</td>
+            </tr>`;
+            tbody.innerHTML += row;
+        });
+    }
+
+    function restartQuiz() {
+        window.location.reload(); 
+    }
+</script>
+</body>
+</html>
